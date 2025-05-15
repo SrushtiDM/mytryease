@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Staff Request Dashboard</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .request { border: 1px solid #ccc; margin: 10px 0; padding: 10px; border-radius: 5px; position: relative; }
+    .delete-btn { position: absolute; top: 10px; right: 10px; background: red; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h2>Incoming Requests</h2>
+  <div id="requestList"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyApj_JciN1u0MuDPZasPI8mn712e0WVj0A",
+      authDomain: "smart-t-room.firebaseapp.com",
+      databaseURL: "https://smart-t-room-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "smart-t-room",
+      storageBucket: "smart-t-room.appspot.com",
+      messagingSenderId: "975000928889",
+      appId: "1:975000928889:web:098a5dff224a8ead810aa8",
+      measurementId: "G-3JQ2MZKQE1"
+    };
+
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const list = document.getElementById('requestList');
+
+   db.ref('requests').on('child_added', snapshot => {
+  const data = snapshot.val();
+  const key = snapshot.key;
+
+  const div = document.createElement('div');
+  div.className = 'request';
+
+  const time = new Date(data.timestamp).toLocaleString(); // Format timestamp
+
+  div.innerHTML = `
+    <strong>Trial Room ${data.trialRoom || "N/A"}</strong><br>
+    Item: ${data.item || "N/A"}<br>
+    Size: ${data.size || "N/A"}<br>
+    Color: ${data.color || "N/A"}<br>
+    Time: ${time || "N/A"}<br>
+    <button class="delete-btn" onclick="deleteRequest('${key}', this)">Delete</button>
+  `;
+
+  list.prepend(div);
+});
+
+
+    function deleteRequest(key, button) {
+      db.ref('requests/' + key).remove()
+        .then(() => {
+          button.parentElement.remove();
+        })
+        .catch(error => {
+          console.error("Error deleting request:", error);
+        });
+    }
+  </script>
+</body>
+</html>

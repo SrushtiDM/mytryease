@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Fitting Room - Scan & Try</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 0; padding: 0; }
+    header { background: #34495e; color: white; padding: 1em; text-align: center; }
+    .container { max-width: 600px; margin: 2em auto; padding: 1em; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .search-box, .trial-box { display: flex; gap: 0.5em; margin-bottom: 1em; }
+    input[type=text] { flex: 1; padding: 0.5em; font-size: 1em; }
+    button { padding: 0.5em 1em; font-size: 1em; cursor: pointer; background: #3498db; color: white; border: none; border-radius: 5px; }
+    .card img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; }
+    .details { margin-top: 1em; }
+    .details h3 { margin-bottom: 0.2em; }
+    .selects label { display: block; margin-top: 0.5em; }
+    .selects select { width: 100%; padding: 0.5em; margin-top: 0.3em; }
+    .suggestions { margin-top: 1em; }
+    .request-btn { width: 100%; padding: 0.7em; margin-top: 1em; font-size: 1em; border: none; border-radius: 5px; background: #e67e22; color: white; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Smart Fitting Room</h1>
+    <p>Scan to Explore Smart Fitting!</p>
+  </header>
+  <div class="container">
+    <div class="trial-box">
+      <input type="text" id="trialRoomNumber" placeholder="Enter Trial Room Number">
+    </div>
+    <div class="search-box">
+      <input type="text" id="itemCode" placeholder="Enter garment code (e.g., A23C1)">
+      <button onclick="searchItem()">Search</button>
+    </div>
+    <div id="itemDetails"></div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyApj_JciN1u0MuDPZasPI8mn712e0WVj0A",
+      authDomain: "smart-t-room.firebaseapp.com",
+      databaseURL: "https://smart-t-room-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "smart-t-room",
+      storageBucket: "smart-t-room.appspot.com",
+      messagingSenderId: "975000928889",
+      appId: "1:975000928889:web:098a5dff224a8ead810aa8",
+      measurementId: "G-3JQ2MZKQE1"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Inventory data
+    const inventory = {
+      "A23C1": {
+        name: "Red T-Shirt",
+        price: "$19.99",
+        sizes: ["S", "M", "L", "XL"],
+        colors: ["Red", "Blue", "Black"],
+        availableSizes: ["M", "L"],
+        availableColors: ["Red", "Blue"],
+        image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/red t shirt.jpg",
+        suggestions: ["Blue Jeans", "Black Sneakers"],
+        recommendationImages: [
+          { name: "Blue Jeans", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/ripped jeans.webp" },
+          { name: "Black Sneakers", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/black_sneakers.webp" }
+        ]
+      },
+      "B11J2": {
+        name: "Denim Jeans",
+        price: "$39.99",
+        sizes: ["28", "30", "32", "34"],
+        colors: ["Blue", "Black"],
+        availableSizes: ["30", "32"],
+        availableColors: ["Blue"],
+        image: "C:/Users/acer/OneDrive/Desktop/Pictures/denim jeans.webp",
+        suggestions: ["White T-Shirt", "Leather Belt"],
+        recommendationImages: [
+          { name: "White T-Shirt", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/white_Tshirt.jpg" },
+          { name: "Leather Belt", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/leatherbelt.jpg" }
+        ]
+      },
+      "C55K3": {
+        name: "Black Jacket",
+        price: "$59.99",
+        sizes: ["M", "L", "XL"],
+        colors: ["Black", "Brown"],
+        availableSizes: ["L"],
+        availableColors: ["Black"],
+        image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/jacket.avif",
+        suggestions: ["Grey Beanie", "Blue Jeans"],
+        recommendationImages: [
+          { name: "Grey Beanie", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/grey_beanie.avif" },
+          { name: "Blue Jeans", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/light_blue_jeans.avif" }
+        ]
+      }
+    };
+
+    function searchItem() {
+      const code = document.getElementById('itemCode').value.toUpperCase();
+      const item = inventory[code];
+      const details = document.getElementById('itemDetails');
+      details.innerHTML = '';
+
+      if (!item) {
+        details.innerHTML = `<div class="card"><p>Item not found. Please check the code.</p></div>`;
+        return;
+      }
+
+      const sizeOptions = item.sizes.map(size => {
+        const isAvailable = item.availableSizes.includes(size);
+        return `<option value="${size}" ${isAvailable ? '' : 'disabled'}>${size} ${isAvailable ? '' : '(Out of stock)'}</option>`;
+      }).join('');
+
+      const colorOptions = item.colors.map(color => {
+        const isAvailable = item.availableColors.includes(color);
+        return `<option value="${color}" ${isAvailable ? '' : 'disabled'}>${color} ${isAvailable ? '' : '(Out of stock)'}</option>`;
+      }).join('');
+
+      const suggestionsHTML = item.recommendationImages.map(s => `
+        <div style="display: inline-block; margin: 10px; text-align: center;">
+          <img src="${s.image}" alt="${s.name}" style="width: 100px; height: 100px; border-radius: 8px;" />
+          <p>${s.name}</p>
+        </div>
+      `).join('');
+
+      details.innerHTML = `
+        <div class="card">
+          <img src="${item.image}" alt="${item.name}" />
+          <div class="details">
+            <h3>${item.name}</h3>
+            <p>Price: ${item.price}</p>
+            <div class="selects">
+              <label for="color">Color:</label>
+              <select id="selectedColor">${colorOptions}</select>
+              <label for="size">Size:</label>
+              <select id="selectedSize">${sizeOptions}</select>
+            </div>
+            <button class="request-btn" onclick="requestSize('${item.name}')">Request a Different Size or Color</button>
+            <div class="suggestions">
+              <h4>Matching Items:</h4>
+              ${suggestionsHTML}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function requestSize(itemName) {
+      const trialRoom = document.getElementById('trialRoomNumber').value;
+      const size = document.getElementById('selectedSize').value;
+      const color = document.getElementById('selectedColor').value;
+      if (!trialRoom) {
+        alert("Please enter the trial room number before making a request.");
+        return;
+      }
+
+      const requestData = {
+        trialRoom: trialRoom,
+        item: itemName,
+        size: size,
+        color: color,
+        timestamp: Date.now()
+      };
+
+      db.ref('requests').push(requestData)
+        .then(() => {
+          alert(`Staff Notification: Trial Room ${trialRoom} requests a different option for ${itemName} - Size: ${size}, Color: ${color}`);
+        })
+        .catch(error => {
+          console.error("Error sending request:", error);
+        });
+    }
+  </script>
+</body>
+</html>
