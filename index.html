@@ -65,11 +65,11 @@
         colors: ["Red", "Blue", "Black"],
         availableSizes: ["M", "L"],
         availableColors: ["Red", "Blue"],
-        image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/red t shirt.jpg",
+        image: "images/red_tshirt.jpg",
         suggestions: ["Blue Jeans", "Black Sneakers"],
         recommendationImages: [
-          { name: "Blue Jeans", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/ripped jeans.webp" },
-          { name: "Black Sneakers", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/black_sneakers.webp" }
+          { name: "Blue Jeans", image: "images/ripped_jeans.webp" },
+          { name: "Black Sneakers", image: "images/black_sneakers.webp" }
         ]
       },
       "B11J2": {
@@ -79,11 +79,11 @@
         colors: ["Blue", "Black"],
         availableSizes: ["30", "32"],
         availableColors: ["Blue"],
-        image: "C:/Users/acer/OneDrive/Desktop/Pictures/denim jeans.webp",
+        image: "images/denim_jeans.webp",
         suggestions: ["White T-Shirt", "Leather Belt"],
         recommendationImages: [
-          { name: "White T-Shirt", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/white_Tshirt.jpg" },
-          { name: "Leather Belt", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/leatherbelt.jpg" }
+          { name: "White T-Shirt", image: "images/white_Tshirt.jpg" },
+          { name: "Leather Belt", image: "images/leatherbelt.jpg" }
         ]
       },
       "C55K3": {
@@ -93,11 +93,11 @@
         colors: ["Black", "Brown"],
         availableSizes: ["L"],
         availableColors: ["Black"],
-        image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/jacket.avif",
+        image: "images/jacket.avif",
         suggestions: ["Grey Beanie", "Blue Jeans"],
         recommendationImages: [
-          { name: "Grey Beanie", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/grey_beanie.avif" },
-          { name: "Blue Jeans", image: "C:/Users/acer/OneDrive/Desktop/Pictures/Documents/light_blue_jeans.avif" }
+          { name: "Grey Beanie", images/grey_beanie.avif" },
+          { name: "Blue Jeans", images/light_blue_jeans.avif" }
         ]
       }
     };
@@ -109,18 +109,18 @@
       details.innerHTML = '';
 
       if (!item) {
-        details.innerHTML = `<div class="card"><p>Item not found. Please check the code.</p></div>`;
+        details.innerHTML = <div class="card"><p>Item not found. Please check the code.</p></div>;
         return;
       }
 
       const sizeOptions = item.sizes.map(size => {
         const isAvailable = item.availableSizes.includes(size);
-        return `<option value="${size}" ${isAvailable ? '' : 'disabled'}>${size} ${isAvailable ? '' : '(Out of stock)'}</option>`;
+        return <option value="${size}" ${isAvailable ? '' : 'disabled'}>${size} ${isAvailable ? '' : '(Out of stock)'}</option>;
       }).join('');
 
       const colorOptions = item.colors.map(color => {
         const isAvailable = item.availableColors.includes(color);
-        return `<option value="${color}" ${isAvailable ? '' : 'disabled'}>${color} ${isAvailable ? '' : '(Out of stock)'}</option>`;
+        return <option value="${color}" ${isAvailable ? '' : 'disabled'}>${color} ${isAvailable ? '' : '(Out of stock)'}</option>;
       }).join('');
 
       const suggestionsHTML = item.recommendationImages.map(s => `
@@ -171,7 +171,7 @@
 
       db.ref('requests').push(requestData)
         .then(() => {
-          alert(`Staff Notification: Trial Room ${trialRoom} requests a different option for ${itemName} - Size: ${size}, Color: ${color}`);
+          alert(Staff Notification: Trial Room ${trialRoom} requests a different option for ${itemName} - Size: ${size}, Color: ${color});
         })
         .catch(error => {
           console.error("Error sending request:", error);
